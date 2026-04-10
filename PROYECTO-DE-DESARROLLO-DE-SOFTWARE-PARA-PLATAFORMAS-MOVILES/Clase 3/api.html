@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Genshin</title>
+    <link rel="stylesheet" href="api.css">
+</head>
+
+<body>
+
+    <div class="todo">
+        <h1>Genshin Impact</h1>
+
+        <input type="text" id="busqueda" placeholder="Ej: klee, neuvillette, baizhu" class="Busqueda">
+        <button onclick="buscarGenshin()" class="botoncito">Buscar</button>
+
+        <div id="resultado"></div>
+
+        <script>
+            async function buscarGenshin() {
+                //minúsculas y guiones en lugar de espacios
+                const nombre = document.getElementById("busqueda").value.toLowerCase().trim().replace(/\s+/g, '-');
+                const contenedor = document.getElementById("resultado");
+
+                if (!nombre) {
+                    contenedor.innerHTML = "Escribe un nombre de personaje.";
+                    return;
+                }
+
+                contenedor.innerHTML = "Conectando con el servidor...";
+
+                // La antigua URL, pq me tienen podrida.
+                const base = "https://genshin.jmp.blue/characters/";
+
+                try {
+                    const respuesta = await fetch(base + nombre);
+
+                    if (!respuesta.ok) {
+                        contenedor.innerHTML = "Personaje no encontrado.";
+                        return;
+                    }
+
+                    const datos = await respuesta.json();
+
+                    // Imágenes
+                    const urlImagen = `${base}${nombre}/gacha-card`;
+
+                    //saque la deco de un codigo con Musseto (repeti la api porque de las 6 que probe una estaba desactivada, otra andaba lento, otra no existia. Me canse)
+                    contenedor.innerHTML = `
+                    <div class="card-genshin" style="border: 2px solid #3d424d; background: #1a1c22; color: #fff; padding: 20px; border-radius: 10px;">
+                        <h2 style="color: #ece5d8;">${datos.name}</h2>
+                        <p>Visión: ${datos.vision} | Arma: ${datos.weapon}</p>
+                        <p>Región: ${datos.nation}</p>
+                        
+                        <img src="${urlImagen}" alt="${datos.name}" 
+                             style="width: 100%; max-width: 300px; border-radius: 5px;"
+                             onerror="this.src='https://genshin.jmp.blue/characters/${nombre}/portrait'">
+                        
+                        <p class="parrafo">${datos.description}</p>
+                    </div>
+                `;
+
+                } catch (e) {
+                    console.error(e);
+                    contenedor.innerHTML = "Error de conexión con jmp.blue.";
+                }
+            }
+        </script>
+    </div>
+</body>
+
+</html>
